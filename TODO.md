@@ -1,0 +1,18 @@
+# TODO
+- [x] 需求评审和理解`QUESTION.md`
+- [x] 生成解决方案`SOLUTION.md`
+- [x] 代码AI提示词`AGENTS.md`
+- [x] Agent workflow技术选型`agent使用langchian/langgraph`
+- [x] Agent初始化项目 `langgraph 有脚手架`
+- [x] 了解一下`langgraph`的使用方法
+- [x] ROLE_CLASSIFIER的prompt编写 `./src/agent/prompt.py:ROLE_CLASSIFIER_SYSTEM_PROMPT`
+- [x] `langgraph`运行时state的定义 `./src/agent/state.py:GraphState`
+- [x] 定义llm的schema输出`./src/agent/modal.py:FinallyOutput,RoleClassifierOutput`
+- [x] role_classifier_agent_node
+- [ ] agent history存储有些简陋,改为sql
+- [ ] 前端技术选型
+- [ ] 后端服务技术选型
+- [ ] 后端服务如何和langgraph配合
+- [ ] prompt中英文和llm适配的优化
+- [ ] 目录结构，变量命名是否规范？使用ai帮助我
+- [ ] 加入日志输出，应该有中间件/hook之类的帮助我
