@@ -1,22 +1,26 @@
 import json
 from langchain_core.messages import HumanMessage, SystemMessage
-from langgraph.prebuilt.chat_agent_executor import Runtime
+from langchain_core.runnables import RunnableConfig
 import time
 from agent.modal import RoleClassifierOutput
 from agent.prompt import ROLE_CLASSIFIER_SYSTEM_PROMPT
-from agent.state import GraphContext, GraphState
+from agent.state import GraphState
 from agent.utils.llm_utils import create_openai_llm
 from agent.utils.sqlite_utils import sql_manager
 
 
-def role_classifier_agent_node(state: GraphState, runtime: Runtime[GraphContext]) -> GraphState:
+def role_classifier_agent_node(state: GraphState, config: RunnableConfig) -> GraphState:
     """
         role_classifier_agent_node节点，用来区分用户角色，和输入摘要
         通过本地化存储(local sqlite)，通过`摘要记录(历史解析结果)`的方式来保存记忆
         摘要记录方式虽然会丢失语境和稍有偏差，但是对于专业向的agent，这个偏差是可以接受的。
         通过thread_id进行数据隔离
     """
-    thread_id = runtime.context["thread_id"]
+    thread_id = config['configurable'].get(
+        "thread_id") if config['configurable'] else None
+    if not thread_id:
+        raise Exception("thread_id is required")
+
     llm = create_openai_llm().with_structured_output(RoleClassifierOutput)
     history = []
     sql_record = sql_manager.get_role_classifier_history(thread_id)
@@ -28,7 +32,6 @@ def role_classifier_agent_node(state: GraphState, runtime: Runtime[GraphContext]
         "role_override_by_user": state.role_override_by_user,
         "conversation_history": history
     }, ensure_ascii=False, indent=2)
-    print("role_classifier_agent_node json_input", json_input)
 
     resp: RoleClassifierOutput = llm.invoke(
         input=[

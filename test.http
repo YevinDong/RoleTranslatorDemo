@@ -1,0 +1,7 @@
+### health
+GET http://localhost:8000/health http/1.1
+
+### chat
+POST http://localhost:8000/chat http/1.1
+
+{"user_input": "我把SQL读写速度提升了301%","thread_id": "thread-2"}

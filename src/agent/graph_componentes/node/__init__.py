@@ -12,6 +12,6 @@ __all__ = [
     "product_to_dev_node",
     "end_generate_msg_node",
     "role_classifier_agent_node",
-    "init_state_node"
+    "init_state_node",
     "output_node"
 ]

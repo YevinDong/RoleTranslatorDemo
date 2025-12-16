@@ -25,4 +25,4 @@ class FinallyOutput(BaseModel):
     transction_content: str = Field(...,
                                     description="Integrate transction content raised by users")
     result: str = Field(..., description="result")
-    reson: str = Field(..., description="reson")
+    reason: str = Field(..., description="reason")

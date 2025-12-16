@@ -1,8 +1,8 @@
 from langgraph.prebuilt.chat_agent_executor import Runtime
-from agent.state import GraphContext, GraphState
+from agent.state import GraphState
 
 
-def archiver_node(state: GraphState, runtime: Runtime[GraphContext]) -> GraphState:
+def archiver_node(state: GraphState) -> GraphState:
     """
         archiver_node节点，用于归纳总结传递过来的信息。
         如果增加leader角色需要在这里将dev和product角色的输出进行整合

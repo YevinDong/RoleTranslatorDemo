@@ -9,10 +9,11 @@
 - [x] `langgraph`运行时state的定义 `./src/agent/state.py:GraphState`
 - [x] 定义llm的schema输出`./src/agent/modal.py:FinallyOutput,RoleClassifierOutput`
 - [x] role_classifier_agent_node
-- [ ] agent history存储有些简陋,改为sql
+- [x] agent history存储有些简陋,改为sql
+- [ ] 增加agent连接池
 - [ ] 前端技术选型
-- [ ] 后端服务技术选型
-- [ ] 后端服务如何和langgraph配合
+- [x] 后端服务技术选型`FastAPI`
+- [ ] 后端服务如何和更好的和langgraph配合
 - [ ] prompt中英文和llm适配的优化
 - [ ] 目录结构，变量命名是否规范？使用ai帮助我
 - [ ] 加入日志输出，应该有中间件/hook之类的帮助我

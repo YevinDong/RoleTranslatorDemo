@@ -36,6 +36,7 @@ def create_graph() -> StateGraph:
     graph.add_edge("end_generate_msg_node", "output_node")
     graph.add_edge("archiver_node", "output_node")
     graph.add_edge("output_node", END)
+    graph.set_finish_point("output_node")
 
     # add conditional edges (LangGraph >= 1.0 API)
     graph.add_conditional_edges(

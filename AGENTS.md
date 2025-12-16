@@ -17,3 +17,4 @@ Agent internal files/modules explained:  When encountering functions/variables w
 - `./src/agent/state.py`: Defines the agent state  
 - `./src/agent/tools/**.py`: Tools required by the LangChain agent  
 - `./src/agent/utils/**.py`: Utility functions for the project, including logger, LLM export, env loading, etc.
+- `./src/agent/graph_componentes/**.py`: Graph node components
