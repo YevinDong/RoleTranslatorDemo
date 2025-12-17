@@ -52,6 +52,8 @@ async def chat_endpoint(
     }
     state_input = {"user_input": user_input}
     # TODO sse应该是订阅机制，但是这里就是模拟一下直接触发workflow了
+    # 前端根据thread_id订阅sse，然后前端post数据给后台，后台接到后给前端sse推送
+    # 目前这个设计有点畸形了
     # TODO stream 这里直接把所有snapshot状态暴漏了，其实不符合规范
 
     async def sse_generator():
