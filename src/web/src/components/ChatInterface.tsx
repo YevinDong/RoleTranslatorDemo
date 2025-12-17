@@ -1,9 +1,13 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button, Input, Card, Space, Spin, message } from 'antd';
 import { SendOutlined, UserOutlined, RobotOutlined } from '@ant-design/icons';
 import styled from 'styled-components';
 import { end_node, nodeNameTextMap, sendMessageGetSSE } from '../utils/sendMessageGetSSE';
 import { v7 } from 'uuid';
+import { useQuery } from '@tanstack/react-query';
+import localforage from 'localforage';
+import { Message } from '../types';
+import { getMessages, savaMessages, saveThreadIdHistory } from '../utils/cache';
 
 const { TextArea } = Input;
 
@@ -47,25 +51,31 @@ const StyledTextArea = styled(TextArea)`
   resize: none;
 `;
 
-interface Message {
-    id: string;
-    content: string;
-    isUser: boolean;
-    timestamp: Date;
-}
 
-const ChatInterface: React.FC = () => {
-    const [threadId, setThreadId] = useState(localStorage.getItem('threadId') || v7());
+
+const ChatInterface: React.FC<{ current_thread_id: string, updateThreadId: () => void }> = ({ current_thread_id, updateThreadId }) => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
 
-
     useEffect(() => {
-        // 自动滚动到底部
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
+
+    const { data: historyMessage, isPending } = useQuery({
+        queryKey: ['thread_id_message_history' + current_thread_id],
+        queryFn: async () => await getMessages(current_thread_id),
+        staleTime: 0,
+        refetchOnWindowFocus: false,
+        enabled: !!current_thread_id,
+    });
+    useEffect(() => {
+        console.log(historyMessage)
+        if (historyMessage) {
+            setMessages(historyMessage as any);
+        }
+    }, [historyMessage]);
 
     const handleSendMessage = async () => {
         if (!inputValue.trim() || isLoading) return;
@@ -82,7 +92,6 @@ const ChatInterface: React.FC = () => {
         setIsLoading(true);
 
         try {
-
             const { connect, disconnect } = sendMessageGetSSE({
                 onMessage: (data) => {
                     setMessages(prev => {
@@ -102,20 +111,23 @@ const ChatInterface: React.FC = () => {
                             const state = data.snapshot;
                             currentMsg.content = `
                             生成结束：
-                            您的角色是：${state.role_inferred}
-                            角色评分是（0-1分，数值越大越好）：${state.role_confidence}
-                            评判角色的理由是：${state.reason}
-                            您想要转换的内容是：${state.transction_content}
+                            🍉您的角色是：${state.role_inferred}
+                            🍊角色评分是（0-1分，数值越大越好）：${state.role_confidence}
+                            🍋评判角色的理由是：${state.reason}
+                            🍋‍🟩您想要转换的内容是：${state.transction_content}
                     
 
-                            结果：
+                            🍌结果：
                             ${state.result}
                             `
                         } else {
                             currentMsg.content = nodeNameTextMap[data.node_name] || "未知流程"
                         }
-
-                        return [...prev];
+                        const next = [...prev];
+                        // 乐观更新一下
+                        savaMessages(current_thread_id, next)
+                        saveThreadIdHistory(current_thread_id)
+                        return next;
                     });
                     console.log(data);
                 },
@@ -128,7 +140,7 @@ const ChatInterface: React.FC = () => {
                 },
                 queryParams: {
                     user_input: inputValue,
-                    thread_id: threadId
+                    thread_id: current_thread_id
                 },
             })
             connect()
@@ -140,7 +152,7 @@ const ChatInterface: React.FC = () => {
             message.error('发送消息失败');
             setIsLoading(false);
         }
-    };
+    }
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -149,47 +161,53 @@ const ChatInterface: React.FC = () => {
         }
     };
 
+
     return (
         <ChatContainer>
-            <h1 style={{ textAlign: 'center', marginBottom: 20 }}>AI 对话助手</h1>
-
-            <MessagesContainer>
-                {messages.map((message) => (
-                    <MessageBubble key={message.id} isUser={message.isUser}>
-                        <Space>
-                            {message.isUser ? <UserOutlined /> : <RobotOutlined />}
-                            <span style={{ whiteSpace: 'pre-line' }}>{message.content}</span>
-                        </Space>
-                    </MessageBubble>
-                ))}
-                {/* {isLoading && (
-                    <MessageBubble isUser={false}>
-                        <Spin size="small" />
-                        <span style={{ marginLeft: 8 }}>AI 正在思考...</span>
-                    </MessageBubble>
-                )} */}
-                <div ref={messagesEndRef} />
-            </MessagesContainer>
-
-            <InputContainer>
-                <StyledTextArea
-                    rows={2}
-                    value={inputValue}
-                    onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={handleKeyPress}
-                    placeholder="输入您的问题..."
-                    disabled={isLoading}
-                />
-                <Button
-                    type="primary"
-                    icon={<SendOutlined />}
-                    onClick={handleSendMessage}
-                    loading={isLoading}
-                    disabled={!inputValue.trim()}
-                >
-                    发送
+            <h1 style={{ textAlign: 'center', marginBottom: 20 }}>
+                AI 角色翻译<br />
+                当前会话ID：{current_thread_id}
+                <Button type="primary" onClick={updateThreadId}>
+                    开始新的对话
                 </Button>
-            </InputContainer>
+            </h1>
+            {
+                isPending ? <><Spin size="large" />正在查找缓存</> :
+                    <>
+                        <MessagesContainer>
+                            {messages.map((message) => (
+                                <MessageBubble key={message.id} isUser={message.isUser}>
+                                    <Space>
+                                        {message.isUser ? <UserOutlined /> : <RobotOutlined />}
+                                        <span style={{ whiteSpace: 'pre-line' }}>{message.content}</span>
+                                    </Space>
+                                </MessageBubble>
+                            ))}
+                            <div ref={messagesEndRef} />
+                        </MessagesContainer>
+
+                        <InputContainer>
+                            <StyledTextArea
+                                rows={2}
+                                value={inputValue}
+                                onChange={(e) => setInputValue(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                placeholder="输入您的问题..."
+                                disabled={isLoading}
+                            />
+                            <Button
+                                type="primary"
+                                icon={<SendOutlined />}
+                                onClick={handleSendMessage}
+                                loading={isLoading}
+                                disabled={!inputValue.trim()}
+                            >
+                                发送
+                            </Button>
+                        </InputContainer>
+                    </>
+            }
+
         </ChatContainer>
     );
 };

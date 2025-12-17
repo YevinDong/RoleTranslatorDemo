@@ -8,11 +8,11 @@
 - [x] ROLE_CLASSIFIER的prompt编写 `./src/agent/prompt.py:ROLE_CLASSIFIER_SYSTEM_PROMPT`
 - [x] `langgraph`运行时state的定义 `./src/agent/state.py:GraphState`
 - [x] 定义llm的schema输出`./src/agent/modal.py:FinallyOutput,RoleClassifierOutput`
-- [x] role_classifier_agent_node
-- [x] agent history存储有些简陋,改为sql
-- [ ] 增加agent连接池
-- [ ] 前端技术选型
+- [x] role_classifier_agent_node功能实现`./src/agent/role_classifier_agent_node.py`
+- [x] agent history存储有些简陋,`改为了sqlite`
 - [x] 后端服务技术选型`FastAPI`
+- [x] 前端技术选型`React`
+- [ ] 增加agent连接池
 - [ ] 后端服务如何和更好的和langgraph配合
 - [ ] prompt中英文和llm适配的优化
 - [ ] 目录结构，变量命名是否规范？使用ai帮助我
@@ -20,3 +20,6 @@
 - [ ] 多模态支持
 - [ ] agent 联网搜索功能
 - [ ] agent 深度思考
+- [ ] 用户可以入参选择角色，影响agent判断
+- [ ] 前端还很粗糙
+- [ ] sse的使用方式需要修改
