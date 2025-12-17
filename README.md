@@ -44,10 +44,10 @@
 
 目录内包含以下几份文档：
 
-1. `docs/AGENTS.md`：Agent 开发文档
-2. `docs/QUESTION.md`：需求文档
-3. `docs/SOLUTION.md`：AI 生成的解决方案（仅供参考，在解决问题的过程中可能存在偏差，因此该文档具有一定滞后性）
-4. `docs/TODO.md`：待办事项
+1. `/AGENTS.md`：Agent 开发文档
+2. `/QUESTION.md`：需求文档
+3. `/SOLUTION.md`：AI 生成的解决方案（仅供参考，在解决问题的过程中可能存在偏差，因此该文档具有一定滞后性）
+4. `/TODO.md`：待办事项
 
 ### 项目描述
 
