@@ -1,9 +1,21 @@
 import json
 from fastapi import FastAPI, Query
-from .model import Req, Resp
 from agent.graph import graph as workflow
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel
+
+from agent.modal import FinallyOutput
+
+
+class Req(BaseModel):
+    user_input: str
+    thread_id: str
+
+
+class Resp(BaseModel):
+    reply: FinallyOutput
+
 
 app = FastAPI()
 
